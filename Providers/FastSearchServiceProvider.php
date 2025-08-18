@@ -29,9 +29,6 @@ class FastSearchServiceProvider extends ServiceProvider
         $this->hooks();
     }
 
-    /**
-     * Module hooks.
-     */
     public function hooks()
     {
         // Register Eventy filter to override search functionality
@@ -49,7 +46,6 @@ class FastSearchServiceProvider extends ServiceProvider
      */
     public function overrideSearch($conversations, $q, $filters, $user)
     {
-        // If conversations is not empty, it means another module has already handled the search
         if ($conversations !== '') {
             return $conversations;
         }
@@ -59,25 +55,19 @@ class FastSearchServiceProvider extends ServiceProvider
             ->leftJoin('customers', 'conversations.customer_id', '=', 'customers.id')
             ->whereIn('conversations.mailbox_id', $user->mailboxesIdsCanView());
 
-        // Apply search query if provided
         if ($q) {
-            $query->whereRaw('MATCH (conversations.subject, conversations.customer_email) AGAINST (? IN BOOLEAN MODE)', [$q])
-                ->orWhere('customers.full_name', 'LIKE', '%' . $q . '%');
+            $query->whereRaw('MATCH (conversations.subject, conversations.customer_email) AGAINST (? IN BOOLEAN MODE)', [$q]);
         }
 
         $this->applyFilters($query, $filters, $user);
    
-        // Apply sorting
         $sorting = \App\Conversation::getConvTableSorting();
         if ($sorting['sort_by'] == 'date') {
             $sorting['sort_by'] = 'last_reply_at';
         }
         $query->orderBy($sorting['sort_by'], $sorting['order']);
-
-        // Group by to avoid duplicates
         $query->groupBy('conversations.id');
 
-        // Return paginated results
         return $query->paginate(\App\Conversation::DEFAULT_LIST_SIZE);
     }
 
@@ -88,6 +78,10 @@ class FastSearchServiceProvider extends ServiceProvider
                 $filters['assigned'] = null;
             }
             $query->where('conversations.user_id', $filters['assigned']);
+        }
+
+        if (!empty($filters['customer'])) {
+            $query->where('customers.id', '=', $filters['customer']);
         }
 
         if (!empty($filters['mailbox'])) {
@@ -113,8 +107,7 @@ class FastSearchServiceProvider extends ServiceProvider
         }
 
         if (!empty($filters['subject'])) {
-            $like_op = \App\Misc\Helper::isPgSql() ? 'ilike' : 'like';
-            $query->where('conversations.subject', $like_op, '%' . mb_strtolower($filters['subject']) . '%');
+            $query->where('conversations.subject', 'LIKE', '%' . mb_strtolower($filters['subject']) . '%');
         }
 
         if (!empty($filters['attachments'])) {
@@ -127,8 +120,7 @@ class FastSearchServiceProvider extends ServiceProvider
         }
 
         if (!empty($filters['body'])) {
-            $like_op = \App\Misc\Helper::isPgSql() ? 'ilike' : 'like';
-            $query->where('threads.body', $like_op, '%' . mb_strtolower($filters['body']) . '%');
+            $query->whereRaw('MATCH (threads.body) AGAINST (? IN BOOLEAN MODE)', [$filters['body']]);
         }
 
         if (!empty($filters['number'])) {
@@ -183,17 +175,6 @@ class FastSearchServiceProvider extends ServiceProvider
      */
     public function registerViews()
     {
-        $viewPath = resource_path('views/modules/fastsearch');
-
-        $sourcePath = __DIR__.'/../Resources/views';
-
-        $this->publishes([
-            $sourcePath => $viewPath
-        ],'views');
-
-        $this->loadViewsFrom(array_merge(array_map(function ($path) {
-            return $path . '/modules/fastsearch';
-        }, config('view.paths')), [$sourcePath]), 'fastsearch');
     }
 
     /**
