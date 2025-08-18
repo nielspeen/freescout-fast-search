@@ -1,0 +1,22 @@
+{
+    "name": "FastSearch",
+    "alias": "fastsearch",
+    "description": "A module that provides faster search functionality for conversations by overriding the default search method",
+    "version": "1.0.0",
+    "detailsUrl": "",
+    "author": "Niels Peen",
+    "authorUrl": "",
+    "requiredAppVersion": "1.0.2",
+    "license": "AGPL-3.0",
+    "keywords": ["search", "performance", "conversations"],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\FastSearch\\Providers\\FastSearchServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "start.php"
+    ],
+    "requires": []
+}

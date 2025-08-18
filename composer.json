@@ -1,0 +1,25 @@
+{
+    "name": "nielspeen/freescout-fastsearch",
+    "description": "",
+    "authors": [
+        {
+            "name": "Niels Peen",
+            "email": "niels@nielspeen.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\FastSearch\\Providers\\FastSearchServiceProvider"
+            ],
+            "aliases": {
+                
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\FastSearch\\": ""
+        }
+    }
+}
