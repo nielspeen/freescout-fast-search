@@ -56,7 +56,8 @@ class FastSearchServiceProvider extends ServiceProvider
             ->whereIn('conversations.mailbox_id', $user->mailboxesIdsCanView());
 
         if ($q) {
-            $query->whereRaw('MATCH (conversations.subject, conversations.customer_email) AGAINST (? IN BOOLEAN MODE)', [$q]);
+            $query->whereRaw('MATCH (conversations.subject, conversations.customer_email) AGAINST (? IN BOOLEAN MODE)', [$q])
+                ->orWhereRaw('MATCH (threads.body) AGAINST (? IN BOOLEAN MODE)', [$q]);
         }
 
         $this->applyFilters($query, $filters, $user);
