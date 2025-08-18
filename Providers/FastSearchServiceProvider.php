@@ -53,35 +53,38 @@ class FastSearchServiceProvider extends ServiceProvider
         if ($conversations !== '') {
             return $conversations;
         }
-
-        // Import the Conversation model
-        $conversationModel = \App\Conversation::class;
         
-        // Get mailbox IDs the user can access
-        $mailbox_ids = $user->mailboxesIdsCanView();
-        
-        // Start building the query
-        $query = $conversationModel::select('conversations.*')
+        $query = \App\Conversation::select('conversations.*')
             ->join('threads', 'conversations.id', '=', 'threads.conversation_id')
             ->leftJoin('customers', 'conversations.customer_id', '=', 'customers.id')
-            ->whereIn('conversations.mailbox_id', $mailbox_ids);
+            ->whereIn('conversations.mailbox_id', $user->mailboxesIdsCanView());
 
         // Apply search query if provided
         if ($q) {
-            $like = '%' . mb_strtolower($q) . '%';
-            $like_op = \App\Misc\Helper::isPgSql() ? 'ilike' : 'like';
-            
-            // Convert query to integer for ID/number search
-            $q_int = (int)$q;
-            $q_int = $q_int > \App\Misc\Helper::DB_INT_MAX ? \App\Misc\Helper::DB_INT_MAX : $q_int;
-
-            $query->whereRaw('MATCH (subject, customer_email) AGAINST (? IN BOOLEAN MODE)', [$like])
-            ->orWhere('customers.full_name', $like_op, $like);
+            $query->whereRaw('MATCH (conversations.subject, conversations.customer_email) AGAINST (? IN BOOLEAN MODE)', [$q])
+                ->orWhere('customers.full_name', 'LIKE', '%' . $q . '%');
         }
 
-        // Apply filters
+        $this->applyFilters($query, $filters, $user);
+   
+        // Apply sorting
+        $sorting = \App\Conversation::getConvTableSorting();
+        if ($sorting['sort_by'] == 'date') {
+            $sorting['sort_by'] = 'last_reply_at';
+        }
+        $query->orderBy($sorting['sort_by'], $sorting['order']);
+
+        // Group by to avoid duplicates
+        $query->groupBy('conversations.id');
+
+        // Return paginated results
+        return $query->paginate(\App\Conversation::DEFAULT_LIST_SIZE);
+    }
+
+    private function applyFilters($query, $filters, $user)
+    {
         if (!empty($filters['assigned'])) {
-            if ($filters['assigned'] == $conversationModel::USER_UNASSIGNED) {
+            if ($filters['assigned'] == \App\Conversation::USER_UNASSIGNED) {
                 $filters['assigned'] = null;
             }
             $query->where('conversations.user_id', $filters['assigned']);
@@ -152,19 +155,6 @@ class FastSearchServiceProvider extends ServiceProvider
         if (!empty($filters['before'])) {
             $query->where('conversations.created_at', '<=', date('Y-m-d 23:59:59', strtotime($filters['before'])));
         }
-
-        // Apply sorting
-        $sorting = $conversationModel::getConvTableSorting();
-        if ($sorting['sort_by'] == 'date') {
-            $sorting['sort_by'] = 'last_reply_at';
-        }
-        $query->orderBy($sorting['sort_by'], $sorting['order']);
-
-        // Group by to avoid duplicates
-        $query->groupBy('conversations.id');
-
-        // Return paginated results
-        return $query->paginate($conversationModel::DEFAULT_LIST_SIZE);
     }
 
     /**
