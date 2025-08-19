@@ -1,8 +1,8 @@
 {
     "name": "FastSearch",
     "alias": "fastsearch",
-    "description": "A module that provides faster search functionality for conversations by overriding the default search method",
-    "version": "1.0.3",
+    "description": "A module that provides faster search functionality by leveraging MariaDB's full-text search capabilities.",
+    "version": "1.0.4",
     "detailsUrl": "https://github.com/nielspeen/freescout-fast-search",
     "author": "Niels Peen",
     "authorUrl": "https://github.com/nielspeen",
