@@ -2,11 +2,11 @@
     "name": "FastSearch",
     "alias": "fastsearch",
     "description": "A module that provides faster search functionality for conversations by overriding the default search method",
-    "version": "1.0.2",
-    "detailsUrl": "",
+    "version": "1.0.3",
+    "detailsUrl": "https://github.com/nielspeen/freescout-fast-search",
     "author": "Niels Peen",
-    "authorUrl": "",
-    "requiredAppVersion": "1.0.2",
+    "authorUrl": "https://github.com/nielspeen",
+    "requiredAppVersion": "1.8.190",
     "license": "AGPL-3.0",
     "keywords": ["search", "performance", "conversations"],
     "active": 1,
@@ -18,5 +18,8 @@
     "files": [
         "start.php"
     ],
-    "requires": []
+    "requires": [],
+    "img": "/modules/fastsearch/fastsearch.png",
+    "latestVersionUrl": "https://raw.githubusercontent.com/nielspeen/freescout-fast-search/refs/heads/main/module.json",
+    "latestVersionZipUrl": "https://github.com/nielspeen/freescout-fast-search/archive/refs/heads/main.zip"
 }
