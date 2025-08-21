@@ -3,7 +3,7 @@
     "alias": "fastsearch",
     "description": "A module that provides faster search functionality by leveraging MariaDB's full-text search capabilities.",
     "version": "1.0.4",
-    "detailsUrl": "https://github.com/nielspeen/freescout-fast-search",
+    "detailsUrl": "https://github.com/nielspeen/FastSearch",
     "author": "Niels Peen",
     "authorUrl": "https://github.com/nielspeen",
     "requiredAppVersion": "1.8.190",
@@ -20,6 +20,6 @@
     ],
     "requires": [],
     "img": "/modules/fastsearch/fastsearch.png",
-    "latestVersionUrl": "https://raw.githubusercontent.com/nielspeen/freescout-fast-search/refs/heads/main/module.json",
-    "latestVersionZipUrl": "https://github.com/nielspeen/freescout-fast-search/archive/refs/heads/main.zip"
+    "latestVersionUrl": "https://raw.githubusercontent.com/nielspeen/FastSearch/refs/heads/main/module.json",
+    "latestVersionZipUrl": "https://github.com/nielspeen/FastSearch/archive/refs/heads/main.zip"
 }
